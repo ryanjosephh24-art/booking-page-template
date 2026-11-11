@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title> MONARCH Hair Studio – Book an appointment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF;
+  --surface:#FFFFFF;
+  --ink:#000000;
+  --muted:#6B6B6B;
+  --line:#E5E5E5;
+  --accent:#000000;
+  --accent-ink:#FFFFFF;
+  --wa:#000000;
+  --wa-ink:#FFFFFF;
+  --focus:#000000;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,sans-serif;font-size:16px;line-height:1.55}
+.wrap{max-width:720px;margin:0 auto;padding:28px 20px 56px}
+h1,h2{font-family:"Bricolage Grotesque",Figtree,sans-serif;margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(2.4rem,9vw,3.8rem);line-height:1.02;font-weight:800}
+h2{font-size:1.25rem;font-weight:700;margin-bottom:12px}
+.hero{padding:20px 0 28px}
+.hero p{color:var(--muted);max-width:46ch;margin:14px 0 0}
+.meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;font-size:.95rem}
+.meta a{color:var(--ink);text-underline-offset:3px}
+section{margin-top:30px}
+.grid{display:grid;gap:10px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;
+  font:inherit;cursor:pointer}
+.opt small{display:block;color:var(--muted);font-size:.85rem}
+.opt b{font-weight:600}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opt[aria-pressed="true"] small{color:var(--accent-ink);opacity:.8}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:9px 16px;font:inherit;cursor:pointer;text-align:center}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:600}
+.chip:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+input{width:100%;font:inherit;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:13px 16px}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.summary{background:var(--surface);border:1.5px dashed var(--line);border-radius:12px;padding:14px 16px;margin-top:30px;color:var(--muted)}
+.summary strong{color:var(--ink)}
+.cta{display:block;width:100%;margin-top:14px;background:var(--wa);color:var(--wa-ink);border:0;border-radius:14px;padding:17px;font:inherit;font-weight:600;font-size:1.05rem;cursor:pointer}
+.cta:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:.85rem;color:var(--muted);margin-top:10px}
+.err{color:#C62828;font-size:.9rem;min-height:1.3em;margin-top:8px}
+footer{margin-top:40px;font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <h1 id="name"></h1>
+    <p id="tagline"></p>
+    <div class="meta">
+      <span id="hours"></span>
+      <a id="map" target="_blank" rel="noopener"></a>
+    </div>
+  </header>
+
+  <section aria-labelledby="s1">
+    <h2 id="s1">Choose a service</h2>
+    <div class="grid" id="services"></div>
+  </section>
+
+  <section aria-labelledby="s2">
+    <h2 id="s2">Pick a day</h2>
+    <div class="chips" id="days"></div>
+  </section>
+
+  <section aria-labelledby="s3">
+    <h2 id="s3">Pick a time</h2>
+    <div class="chips" id="times"></div>
+  </section>
+
+  <section aria-labelledby="s4">
+    <h2 id="s4">Your name</h2>
+    <input id="cust" type="text" autocomplete="name" placeholder="Full name" maxlength="60">
+  </section>
+
+  <div class="summary" id="summary" aria-live="polite">Choose a service, day and time to continue.</div>
+  <div class="err" id="err" role="alert"></div>
+  <button class="cta" id="book" type="button">Book on WhatsApp</button>
+  <p class="note">This opens WhatsApp with your request filled in. The studio will confirm your slot by reply.</p>
+
+  <footer id="foot"></footer>
+</main>
+
+<script>
+/* ===== EDIT THIS BLOCK FOR EACH NEW CLIENT ===== */
+const SHOP = {
+  name: "MONARCH Hair Studio",
+  tagline: "Cuts, colour and styling in Bandra West. Book your slot in under a minute.",
+  whatsapp: "918104863844",            // country code + number, no + or spaces
+  address: "Linking Road, Bandra West, Mumbai",
+  mapUrl: "https://www.google.com/maps/search/?api=1&query=Linking+Road+Bandra+West+Mumbai",
+  openHour: 10, closeHour: 20,         // 24h format, last slot starts one hour before close
+  slotMinutes: 60,
+  closedWeekday: 1,                    // 0 = Sunday, 1 = Monday, null = open every day
+  daysAhead: 7,
+  services: [
+    { name: "Haircut", price: 400, mins: 45 },
+    { name: "Hair spa", price: 1200, mins: 60 },
+    { name: "Global colour", price: 2800, mins: 120 },
+    { name: "Beard trim", price: 200, mins: 20 },
+    { name: "Bridal consultation", price: 0, mins: 30 }
+  ]
+};
+/* ================================================ */
+
+const $ = id => document.getElementById(id);
+const state = { service: null, day: null, time: null };
+const fmtTime = h => { const hh = h % 12 || 12; return hh + ":00 " + (h < 12 ? "AM" : "PM"); };
+const rupee = n => n === 0 ? "Free" : "₹" + n.toLocaleString("en-IN");
+
+$("name").textContent = SHOP.name;
+$("tagline").textContent = SHOP.tagline;
+$("hours").textContent = "Open " + fmtTime(SHOP.openHour) + " to " + fmtTime(SHOP.closeHour);
+$("map").textContent = SHOP.address; $("map").href = SHOP.mapUrl;
+$("foot").textContent = "© " + new Date().getFullYear() + " " + SHOP.name;
+document.title = SHOP.name + " – Book an appointment";
+
+function pressOne(container, btn){
+  container.querySelectorAll("[aria-pressed]").forEach(b => b.setAttribute("aria-pressed", b === btn));
+}
+
+SHOP.services.forEach(s => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "opt"; b.setAttribute("aria-pressed", "false");
+  b.innerHTML = '<span><b></b><small></small></span><span></span>';
+  b.querySelector("b").textContent = s.name;
+  b.querySelector("small").textContent = s.mins + " min";
+  b.lastElementChild.textContent = rupee(s.price);
+  b.onclick = () => { state.service = s; pressOne($("services"), b); update(); };
+  $("services").appendChild(b);
+});
+
+const days = [];
+for (let i = 0; days.length < SHOP.daysAhead && i < 30; i++){
+  const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + i);
+  if (d.getDay() === SHOP.closedWeekday) continue;
+  days.push(d);
+}
+days.forEach(d => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", "false");
+  const same = d.toDateString() === new Date().toDateString();
+  b.textContent = same ? "Today" : d.toLocaleDateString("en-IN", { weekday:"short", day:"numeric", month:"short" });
+  b.onclick = () => { state.day = d; state.time = null; pressOne($("days"), b); renderTimes(); update(); };
+  $("days").appendChild(b);
+});
+
+function renderTimes(){
+  const box = $("times"); box.innerHTML = "";
+  if (!state.day){ box.innerHTML = '<span class="note">Pick a day first.</span>'; return; }
+  const now = new Date();
+  const isToday = state.day.toDateString() === now.toDateString();
+  for (let h = SHOP.openHour; h + SHOP.slotMinutes/60 <= SHOP.closeHour; h += SHOP.slotMinutes/60){
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", "false");
+    b.textContent = fmtTime(h);
+    if (isToday && h <= now.getHours()) b.disabled = true;
+    b.onclick = () => { state.time = h; pressOne(box, b); update(); };
+    box.appendChild(b);
+  }
+}
+renderTimes();
+
+function update(){
+  const s = $("summary");
+  $("err").textContent = "";
+  if (state.service && state.day && state.time != null){
+    s.innerHTML = "<strong></strong><br><span></span>";
+    s.querySelector("strong").textContent = state.service.name + " (" + rupee(state.service.price) + ")";
+    s.querySelector("span").textContent = state.day.toLocaleDateString("en-IN", { weekday:"long", day:"numeric", month:"long" }) + " at " + fmtTime(state.time);
+  } else {
+    s.textContent = "Choose a service, day and time to continue.";
+  }
+}
+
+$("book").onclick = () => {
+  const name = $("cust").value.trim();
+  if (!state.service){ $("err").textContent = "Choose a service."; return; }
+  if (!state.day){ $("err").textContent = "Pick a day."; return; }
+  if (state.time == null){ $("err").textContent = "Pick a time."; return; }
+  if (!name){ $("err").textContent = "Enter your name."; $("cust").focus(); return; }
+  const when = state.day.toLocaleDateString("en-IN", { weekday:"long", day:"numeric", month:"long" }) + " at " + fmtTime(state.time);
+  const msg = "Hi " + SHOP.name + ", I’d like to book:\n" +
+    "Service: " + state.service.name + " (" + rupee(state.service.price) + ")\n" +
+    "When: " + when + "\n" +
+    "Name: " + name + "\nPlease confirm. Thank you!";
+  window.open("https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent(msg), "_blank", "noopener");
+};
+</script>
+</body>
+</html>
